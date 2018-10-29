@@ -127,7 +127,7 @@ int strncasecmp(const char *s1, const char *s2, size_t n);
 #endif
 
 #ifndef RESOLV_CONF_MDNS_INCLUDE_GLOBAL_V6_ADDRS
-#define RESOLV_CONF_MDNS_INCLUDE_GLOBAL_V6_ADDRS 0
+#define RESOLV_CONF_MDNS_INCLUDE_GLOBAL_V6_ADDRS 1
 #endif
 
 /** The maximum number of retries when asking for a name. */
@@ -1179,7 +1179,10 @@ PROCESS_THREAD(resolv_process, ev, data)
   /* TODO: Is there anything we need to do here for IPv4 multicast? */
 #endif
 
+#ifndef CONTIKI_CONF_CUSTOM_HOSTNAME
   resolv_set_hostname(CONTIKI_CONF_DEFAULT_HOSTNAME);
+#endif
+
 #endif /* RESOLV_CONF_SUPPORTS_MDNS */
 
   while(1) {
