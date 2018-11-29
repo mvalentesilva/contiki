@@ -41,12 +41,15 @@
 #include "net/rime/rime.h"
 #include "simple-udp.h"
 
+
+
 #define DEBUG DEBUG_PRINT
 #include "net/ip/uip-debug.h"
 
 #include <stdio.h>
 #include <string.h>
 #include "dev/leds.h"
+#include <stdlib.h>
 
 #define UDP_PORT 1883
 
@@ -142,6 +145,10 @@ publish_receiver(struct mqtt_sn_connection *mqc, const uip_ipaddr_t *source_addr
   memcpy(&incoming_packet, data, datalen);
   incoming_packet.data[datalen-7] = 0x00;
   printf("Published message received: %s\n", incoming_packet.data);
+  if(atoi(incoming_packet.data) == 1)
+      leds_on(LEDS_ALL);
+  if(atoi(incoming_packet.data) == 4)
+      leds_off(LEDS_ALL);
   //see if this message corresponds to ctrl channel subscription request
   if (uip_htons(incoming_packet.topic_id) == ctrl_topic_id) {
     //the new message interval will be read from the first byte of the received packet
@@ -211,9 +218,9 @@ PROCESS_THREAD(publish_process, ev, data)
     {
       PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&send_timer));
 
-      sprintf(buf, "Message %u", message_number);
+      sprintf(buf, "%u", message_number);
       printf("publishing at topic: %s -> msg: %s\n", pub_topic, buf);
-      message_number++;
+      message_number = rand() % 4 + 24;
       buf_len = strlen(buf);
       mqtt_sn_send_publish(&mqtt_sn_c, publisher_topic_id,MQTT_SN_TOPIC_TYPE_NORMAL,buf, buf_len,qos,retain);
       /*if (ctimer_expired(&(mqtt_sn_c.receive_timer)))
@@ -294,7 +301,7 @@ set_connection_address(uip_ipaddr_t *ipaddr)
 {
 #ifndef UDP_CONNECTION_ADDR
 #if RESOLV_CONF_SUPPORTS_MDNS
-#define UDP_CONNECTION_ADDR     pksr.eletrica.eng.br//fd00:baba:ca::18bc:86d3:e22:da2c//fe80::880:a90:135a:2ff4//bbbb::186f:7d95:57d3:fe63// bbbb::f4c9:90f0:2bd7:857//pksr.eletrica.eng.br //fd00:baba:ca::1
+#define UDP_CONNECTION_ADDR     2801:84::1116:10c2:39ea:b970:4ca3//pksr.eletrica.eng.br//fd00:baba:ca::18bc:86d3:e22:da2c//fe80::880:a90:135a:2ff4//bbbb::186f:7d95:57d3:fe63// bbbb::f4c9:90f0:2bd7:857//pksr.eletrica.eng.br //fd00:baba:ca::1
 #elif UIP_CONF_ROUTER
 #define UDP_CONNECTION_ADDR       fd00:0:0:0:0212:7404:0004:0404
 #else
@@ -450,7 +457,7 @@ PROCESS_THREAD(example_mqttsn_process, ev, data)
     {
       PROCESS_WAIT_EVENT();
       if(etimer_expired(&et)) {
-        leds_toggle(LEDS_ALL);
+        //leds_toggle(LEDS_ALL);
         etimer_restart(&et);
       }
     }

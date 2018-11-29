@@ -42,7 +42,7 @@
 #define SEND_INTERVAL		5 * CLOCK_SECOND
 #define MAX_PAYLOAD_LEN		40
 #define CONN_PORT     8802
-#define MDNS 0
+#define MDNS 1
 
 #define LED_TOGGLE_REQUEST (0x79)
 #define LED_SET_STATE (0x7A)
